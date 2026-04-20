@@ -196,9 +196,12 @@ class GMM:
         # We add [:, np.newaxis] to reshape sum_probs to (N, 1) so it divides the (N, K) matrix correctly.
         # We also add a tiny 1e-15 to prevent completely empty clusters from causing a "divide by zero" error.
         self.responsibilities_ = weighted_probs / (sum_probs[:, np.newaxis])
-
     def _m_step(self, X):
         N_j = np.sum(self.responsibilities_, axis = 0) 
+        
+        # --- THE FIX: Save a copy of the old means before updating! ---
+        old_means = self.means.copy()
+        
         self.means = (self.Data @ self.responsibilities_)/N_j 
         self.coeff_ = N_j/self.N
 
@@ -206,7 +209,8 @@ class GMM:
         reg_cov = 1e-6 * np.eye(self.d)
 
         for j in range(self.n_clusters):
-            diff = X - self.means[:, j][:, np.newaxis] 
+            # --- THE FIX: Use the OLD means to calculate the difference ---
+            diff = X - old_means[:, j][:, np.newaxis] 
     
             # 2. Get the responsibilities for THIS cluster and reshape to (N, 1)
             weights = self.responsibilities_[:, j] 

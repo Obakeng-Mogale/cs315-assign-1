@@ -202,7 +202,7 @@ class GMM:
         # --- THE FIX: Save a copy of the old means before updating! ---
         old_means = self.means.copy()
         
-        self.means = (self.Data @ self.responsibilities_)/N_j 
+        self.means = (self.Data @ self.responsibilities_)/N_j #new_means
         self.coeff_ = N_j/self.N
 
         # Define a small regularization term (epsilon)
@@ -210,7 +210,7 @@ class GMM:
 
         for j in range(self.n_clusters):
             # --- THE FIX: Use the OLD means to calculate the difference ---
-            diff = X - old_means[:, j][:, np.newaxis] 
+            diff = X - self.means[:, j][:, np.newaxis] 
     
             # 2. Get the responsibilities for THIS cluster and reshape to (N, 1)
             weights = self.responsibilities_[:, j] 
